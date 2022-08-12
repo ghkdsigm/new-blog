@@ -3,7 +3,7 @@
     "rules": "database.rules.json"
   },
   "firestore": {
-    "rules": "firestore.rules",
+    "rules": "y",
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
@@ -14,10 +14,6 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      { 
-        "source": "/board/*/*",
-        "function" : "seo"
-      },
       {
         "source": "**",
         "destination": "/index.html"
@@ -39,6 +35,27 @@
     },
     "hosting": {
       "port": 5000
+    },
+    "auth": {
+      "port": 9099
+    },
+    "storage": {
+      "port": 9199
+    },
+    "ui": {
+      "enabled": true
     }
+  },
+  "functions": {
+    "source": "functions",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "firebase-debug.log",
+      "firebase-debug.*.log"
+    ]
+  },
+  "remoteconfig": {
+    "template": "remoteconfig.template.json"
   }
 }

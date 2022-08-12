@@ -59,14 +59,7 @@ make file on root
 
 **./firebaseConfig.js**  
 ```javascript
-export default {
-  apiKey: 'AIzaSyAUUNxhnDbmysslWOM5tjg8hx9wGhqlnJ0',
-  authDomain: 'my-blog-c8ac0.firebaseapp.com',
-  projectId: 'my-blog-c8ac0',
-  storageBucket: 'my-blog-c8ac0.appspot.com',
-  messagingSenderId: '885207097990',
-  appId: '1:885207097990:web:0449ee1e5509deaa572707'
-}
+
 ```
 
 ## algolia search key
