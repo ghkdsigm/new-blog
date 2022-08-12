@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // match /{document=**} {
+    //   allow read, write;
+    // }
+    function approvedLevel (level) {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.level <= level;
+    }
+    match /boards/{boardId} {
+      allow read: if true;
+      allow create: if approvedLevel(0);
+      allow update: if approvedLevel(0) || resource.data.uid == request.auth.uid; 
+      allow delete: if approvedLevel(0) || resource.data.uid == request.auth.uid; 
+      match /articles/{articleId} {
+        function incrementArticleCount (before, after) {
+          return before.url == after.url &&
+          before.createdAt == after.createdAt &&
+          before.updatedAt == after.updatedAt &&
+          before.title == after.title &&
+          before.uid == after.uid &&
+          before.important == after.important &&
+          before.user.displayName == after.user.displayName &&
+          before.user.photoURL == after.user.photoURL &&
+          before.user.email == after.user.email &&
+          (before.likeCount != after.likeCount || before.likeUids != after.likeUids || before.readCount != after.readCount) 
+        }
+        allow read: if true;
+        allow create: if approvedLevel(0) || (approvedLevel(5) && request.resource.data.important == 0);
+        allow update: if approvedLevel(0) || resource.data.uid == request.auth.uid || incrementArticleCount(resource.data, request.resource.data); 
+        allow delete: if approvedLevel(0) || resource.data.uid == request.auth.uid; 
+        match /comments/{commentId} {
+          function incrementCommentCount (before, after) {
+            return before.comment == after.comment &&
+            before.createdAt == after.createdAt &&
+            before.updatedAt == after.updatedAt &&
+            before.uid == after.uid &&
+            before.user.displayName == after.user.displayName &&
+            before.user.photoURL == after.user.photoURL &&
+            before.user.email == after.user.email &&
+            (before.likeCount != after.likeCount || before.likeUids != after.likeUids) 
+          }
+          allow read: if true;
+          allow create: if approvedLevel(5);
+          allow update: if approvedLevel(0) || resource.data.uid == request.auth.uid || incrementCommentCount(resource.data, request.resource.data); 
+          allow delete: if approvedLevel(0) || resource.data.uid == request.auth.uid; 
+        }
+      }
+    }
+    match /users/{userId} {
+      allow read: if (request.auth != null && request.auth.uid == userId) || approvedLevel(0)
+      allow update: if (request.auth != null && request.auth.uid == userId && resource.data.level == request.resource.data.level) || approvedLevel(0);
+      allow create, delete: if false; // functions
+    }
+    match /tempFiles/{fileId} {
+      allow read: if approvedLevel(0);
+    }
+  }
+}
